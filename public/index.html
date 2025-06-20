@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPO Web-App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <img src="logo_min.png" alt="IPO Logo" class="logo" width="150" height="110">
+
+  <div style="text-align: right; padding: 1rem 2rem;">
+    <button onclick="logout()" style="background:#552885; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Logout</button>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>IPO Dashboard</h1>
+      <p>Comprehensive IPO tracking and analysis platform</p>
+    </div>
+
+<div id="stockResult" style="text-align: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 2rem; color: #333;"></div>
+
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All IPOs</button>
+      <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+      <button class="filter-btn" data-filter="ongoing">Ongoing</button>
+      <button class="filter-btn" data-filter="listed">Listed</button>
+    </div>
+
+    <div class="ipo-grid" id="ipoGrid">
+      <div class="loading">Loading IPO data...</div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Auth check
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    async function fetchHistory() {
+      const res = await fetch('/api/history', {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+
+      const data = await res.json();
+      const container = document.getElementById('historyData');
+      container.innerHTML = '';
+      if (data.length === 0) {
+        container.innerHTML = '<p>No search history yet.</p>';
+      } else {
+        data.forEach(entry => {
+          const p = document.createElement('p');
+          p.textContent = `${entry.ticker} — ₹${entry.price} @ ${new Date(entry.time_fetched).toLocaleString()}`;
+          container.appendChild(p);
+        });
+      }
+    }
+
+    window.onload = fetchHistory;
+  </script>
+
+</body>
+</html>
